@@ -6,14 +6,14 @@ use DOMDocument;
 
 class OpenGraph
 {
-    public function fetch($url, $allMeta = null, $lang = null)
+    public function fetch($url, $allMeta = null, $lang = null, $verifyImages = true)
     {
         $html = $this->curl_get_contents($url, $lang);
         /**
          * parsing starts here:.
          */
         $doc = new DOMDocument();
-        @$doc->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+        @$doc->loadHTML('<?xml encoding="utf-8" ?>' . $html);
 
         $tags = $doc->getElementsByTagName('meta');
         $metadata = [];
@@ -33,7 +33,7 @@ class OpenGraph
             /*
              * Verify image url
              */
-            if (isset($metadata['image'])) {
+            if (isset($metadata['image']) && $verifyImages) {
                 $isValidImageUrl = $this->verify_image_url($metadata['image']);
                 if (!$isValidImageUrl) {
                     $metadata['image'] = '';
@@ -44,33 +44,33 @@ class OpenGraph
         return $metadata;
     }
 
-    protected function curl_get_contents($url, $lang)
+    protected function curl_get_contents($url, $lang, $userAgent = 'Curl')
     {
         $headers = [
-          'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'Cache-Control: no-cache',
-          'User-Agent: Curl',
+            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Cache-Control: no-cache',
+            sprintf('User-Agent: %s', $userAgent),
         ];
 
         if ($lang) {
-            array_push($headers, 'Accept-Language: '.$lang);
+            array_push($headers, 'Accept-Language: ' . $lang);
         }
 
         $curl = curl_init();
 
         curl_setopt_array($curl, [
-          CURLOPT_URL            => $url,
-          CURLOPT_FAILONERROR    => false,
-          CURLOPT_FOLLOWLOCATION => true,
-          CURLOPT_RETURNTRANSFER => true,
-          CURLOPT_SSL_VERIFYHOST => false,
-          CURLOPT_SSL_VERIFYPEER => false,
-          CURLOPT_ENCODING       => 'UTF-8',
-          CURLOPT_MAXREDIRS      => 10,
-          CURLOPT_TIMEOUT        => 30,
-          CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
-          CURLOPT_CUSTOMREQUEST  => 'GET',
-          CURLOPT_HTTPHEADER     => $headers,
+            CURLOPT_URL            => $url,
+            CURLOPT_FAILONERROR    => false,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_ENCODING       => 'UTF-8',
+            CURLOPT_MAXREDIRS      => 10,
+            CURLOPT_TIMEOUT        => 30,
+            CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST  => 'GET',
+            CURLOPT_HTTPHEADER     => $headers,
         ]);
 
         $response = curl_exec($curl);
