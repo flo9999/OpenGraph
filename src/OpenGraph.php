@@ -6,9 +6,9 @@ use DOMDocument;
 
 class OpenGraph
 {
-    public function fetch($url, $allMeta = null, $lang = null, $verifyImages = true)
+    public function fetch($url, $allMeta = null, $lang = null, $userAgent = 'Curl', $verifyImages = true)
     {
-        $html = $this->curl_get_contents($url, $lang);
+        $html = $this->curl_get_contents($url, $lang, $userAgent);
         /**
          * parsing starts here:.
          */
