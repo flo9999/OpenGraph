@@ -9,10 +9,14 @@ class OpenGraph
     public function fetch($url, $allMeta = null, $lang = null, $userAgent = 'Curl', $verifyImages = true)
     {
         $html = $this->curl_get_contents($url, $lang, $userAgent);
+
+        $libXmlState = \libxml_use_internal_errors(true);
+
         /**
          * parsing starts here:.
          */
         $doc = new DOMDocument();
+
         @$doc->loadHTML('<?xml encoding="utf-8" ?>' . $html);
 
         $tags = $doc->getElementsByTagName('meta');
@@ -40,6 +44,9 @@ class OpenGraph
                 }
             }
         }
+
+        \libxml_clear_errors();
+        \libxml_use_internal_errors($libXmlState);
 
         return $metadata;
     }
